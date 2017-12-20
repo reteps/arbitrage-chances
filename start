@@ -1,0 +1,47 @@
+#!/usr/bin/env python3
+
+import pymarketcap, decimal
+from operator import itemgetter
+cmc = pymarketcap.Pymarketcap()
+MINIMUM_PERCENT_VOL = 1
+ACCEPTABLE_TRADING_PAIRS = ['ETH','LTC','BTC']
+MAX_COINS_SHOWN = 10
+info = []
+count = 1
+VERBOSE = False
+ALL_PAIRS = False
+for coin in cmc.ticker():
+    try:
+        markets = cmc.markets(coin["symbol"])
+        best_price = 0
+        best_exchange = ''
+        best_pair = ''
+        worst_price = 999999
+        worst_exchange = ''
+        worst_pair = ''
+        is_up = False
+        for market in markets:
+            trades_into = market["pair"].replace(coin["symbol"],"").replace("-","")
+            if market['percent_volume'] >= MINIMUM_PERCENT_VOL and market['is_updated'] and (trades_into in ACCEPTABLE_TRADING_PAIRS or ALL_PAIRS):
+                is_up = True
+                if market['price_usd'] >= best_price:
+                    best_price = market['price_usd']
+                    best_exchange = market['exchange']
+                    best_pair = trades_into
+                if market['price_usd'] <= worst_price:
+                    worst_price = market['price_usd']
+                    worst_exchange = market['exchange']
+                    worst_pair = trades_into
+        if is_up:
+            info.append([coin['name'],best_price,worst_price,round((best_price/worst_price-1)*100,2),best_exchange,worst_exchange,best_pair,worst_pair])
+        else:
+            if VERBOSE:
+                print(coin['name'],'NO MARKETS THAT FIT CRITERIA')
+    except decimal.InvalidOperation:
+        if VERBOSE:
+            print(coin['name'],'ERROR')
+    print('[{}/100]'.format(count),end='\r')
+    count += 1
+info = sorted(info,key=itemgetter(3))[::-1]
+for coin in info[0:MAX_COINS_SHOWN]:
+    print('{: <25} {: >10} {: >10} {: >6} {: <15} {: <15} {: <5} {: <5}'.format(*coin))
