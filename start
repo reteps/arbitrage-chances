@@ -9,7 +9,13 @@ MAX_COINS_SHOWN = 10
 info = []
 count = 1
 VERBOSE = False
-ALL_PAIRS = False
+ALL_TRADING_PAIRS = False
+print('''CURRENT SETTINGS
+* MINIMUM_PERCENT_VOL:{}
+* ACCEPTABLE_TRADING_PAIRS:{}
+* MAX_COINS_SHOWN:{}
+* VERBOSE:{}
+* ALL_TRADING_PAIRS:{}\n'''.format(MINIMUM_PERCENT_VOL,ACCEPTABLE_TRADING_PAIRS,MAX_COINS_SHOWN,VERBOSE,ALL_TRADING_PAIRS))
 for coin in cmc.ticker():
     try:
         try:
@@ -25,7 +31,7 @@ for coin in cmc.ticker():
         is_up = False
         for market in markets:
             trades_into = market["pair"].replace(coin["symbol"],"").replace("-","")
-            if market['percent_volume'] >= MINIMUM_PERCENT_VOL and market['updated'] and (trades_into in ACCEPTABLE_TRADING_PAIRS or ALL_PAIRS):
+            if market['percent_volume'] >= MINIMUM_PERCENT_VOL and market['updated'] and (trades_into in ACCEPTABLE_TRADING_PAIRS or ALL_TRADING_PAIRS):
                 is_up = True
                 if market['price_usd'] >= best_price:
                     best_price = market['price_usd']
@@ -36,7 +42,7 @@ for coin in cmc.ticker():
                     worst_exchange = market['exchange']
                     worst_pair = trades_into
         if is_up:
-            info.append([coin['name'],best_price,worst_price,round((best_price/worst_price-1)*100,2),best_exchange,worst_exchange,best_pair,worst_pair])
+            info.append([coin['name'],round((best_price/worst_price-1)*100,2),worst_price,worst_exchange,worst_pair,best_price,best_exchange,best_pair])
         else:
             if VERBOSE:
                 print(coin['name'],'NO MARKETS THAT FIT CRITERIA')
@@ -45,6 +51,7 @@ for coin in cmc.ticker():
             print(coin['name'],'ERROR')
     print('[{}/100]'.format(count),end='\r')
     count += 1
-info = sorted(info,key=itemgetter(3))[::-1]
+info = sorted(info,key=itemgetter(1))[::-1]
+print('{: <25} {: >6}% {: >10} {: >15} {: <10} {: <10} {: <15} {: <5}'.format("COIN","CHANGE","BUY PRICE","BUY AT","BUY WITH","SELL PRICE","SELL AT","SELL WITH"))
 for coin in info[0:MAX_COINS_SHOWN]:
-    print('{: <25} {: >10} {: >10} {: >6} {: <15} {: <15} {: <5} {: <5}'.format(*coin))
+    print('{: <25} {: >6}% {: >10} {: >15} {: <10} {: <10} {: <15} {: <5}'.format(*coin))
