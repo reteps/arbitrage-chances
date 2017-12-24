@@ -12,7 +12,10 @@ VERBOSE = False
 ALL_PAIRS = False
 for coin in cmc.ticker():
     try:
-        markets = cmc.markets(coin["symbol"])
+        try:
+            markets = cmc.markets(coin["symbol"])
+        except Exception:
+            pass
         best_price = 0
         best_exchange = ''
         best_pair = ''
@@ -22,7 +25,7 @@ for coin in cmc.ticker():
         is_up = False
         for market in markets:
             trades_into = market["pair"].replace(coin["symbol"],"").replace("-","")
-            if market['percent_volume'] >= MINIMUM_PERCENT_VOL and market['is_updated'] and (trades_into in ACCEPTABLE_TRADING_PAIRS or ALL_PAIRS):
+            if market['percent_volume'] >= MINIMUM_PERCENT_VOL and market['updated'] and (trades_into in ACCEPTABLE_TRADING_PAIRS or ALL_PAIRS):
                 is_up = True
                 if market['price_usd'] >= best_price:
                     best_price = market['price_usd']
