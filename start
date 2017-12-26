@@ -8,7 +8,7 @@ ACCEPTABLE_TRADING_PAIRS = ['ETH','LTC','BTC']
 MAX_COINS_SHOWN = 10
 info = []
 count = 1
-VERBOSE = False
+VERBOSE = True
 ALL_TRADING_PAIRS = False
 print('''CURRENT SETTINGS
 * MINIMUM_PERCENT_VOL:{}
@@ -18,37 +18,34 @@ print('''CURRENT SETTINGS
 * ALL_TRADING_PAIRS:{}\n'''.format(MINIMUM_PERCENT_VOL,ACCEPTABLE_TRADING_PAIRS,MAX_COINS_SHOWN,VERBOSE,ALL_TRADING_PAIRS))
 for coin in cmc.ticker():
     try:
-        try:
-            markets = cmc.markets(coin["symbol"])
-        except Exception:
-            pass
-        best_price = 0
-        best_exchange = ''
-        best_pair = ''
-        worst_price = 999999
-        worst_exchange = ''
-        worst_pair = ''
-        is_up = False
-        for market in markets:
-            trades_into = market["pair"].replace(coin["symbol"],"").replace("-","")
-            if market['percent_volume'] >= MINIMUM_PERCENT_VOL and market['updated'] and (trades_into in ACCEPTABLE_TRADING_PAIRS or ALL_TRADING_PAIRS):
-                is_up = True
-                if market['price_usd'] >= best_price:
-                    best_price = market['price_usd']
-                    best_exchange = market['exchange']
-                    best_pair = trades_into
-                if market['price_usd'] <= worst_price:
-                    worst_price = market['price_usd']
-                    worst_exchange = market['exchange']
-                    worst_pair = trades_into
-        if is_up:
-            info.append([coin['name'],round((best_price/worst_price-1)*100,2),worst_price,worst_exchange,worst_pair,best_price,best_exchange,best_pair])
-        else:
-            if VERBOSE:
-                print(coin['name'],'NO MARKETS THAT FIT CRITERIA')
-    except decimal.InvalidOperation:
+        markets = cmc.markets(coin["symbol"])
+    except Exception as e:
         if VERBOSE:
-            print(coin['name'],'ERROR')
+            print(coin['name'],e)
+    best_price = 0
+    best_exchange = ''
+    best_pair = ''
+    worst_price = 999999
+    worst_exchange = ''
+    worst_pair = ''
+    is_up = False
+    for market in markets:
+        trades_into = market["pair"].replace(coin["symbol"],"").replace("-","")
+        if market['percent_volume'] >= MINIMUM_PERCENT_VOL and market['updated'] and (trades_into in ACCEPTABLE_TRADING_PAIRS or ALL_TRADING_PAIRS):
+            is_up = True
+            if market['price_usd'] >= best_price:
+                best_price = market['price_usd']
+                best_exchange = market['exchange']
+                best_pair = trades_into
+            if market['price_usd'] <= worst_price:
+                worst_price = market['price_usd']
+                worst_exchange = market['exchange']
+                worst_pair = trades_into
+    if is_up:
+        info.append([coin['name'],round((best_price/worst_price-1)*100,2),worst_price,worst_exchange,worst_pair,best_price,best_exchange,best_pair])
+    else:
+        if VERBOSE:
+            print(coin['name'],'NO MARKETS THAT FIT CRITERIA')
     print('[{}/100]'.format(count),end='\r')
     count += 1
 info = sorted(info,key=itemgetter(1))[::-1]
