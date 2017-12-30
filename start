@@ -10,7 +10,7 @@ parser.add_argument('-p','--trading_pairs',nargs='*',default=[],help='Pairs the 
 parser.add_argument('-c','--coins_shown',type=int,default=10,help='Number of coins to show')
 parser.add_argument('-e','--exchanges',nargs='*',help='Acceptable Exchanges - default=all',default=[])
 parser.add_argument('-at','--all_trading_pairs',help='Allow all trading pairs',default=False)
-parser.add_argument('-v','--verbose',help='Show errors and settings',default=False,action="store_true")
+parser.add_argument('-s','--simple',help='Toggle off errors and settings',default=False,action="store_true")
 args = parser.parse_args()
 cmc = pymarketcap.Pymarketcap()
 info = []
@@ -18,7 +18,7 @@ count = 1
 lowercase_exchanges = [x.lower() for x in args.exchanges]
 all_exchanges = not bool(args.exchanges)
 all_trading_pairs = not bool(args.trading_pairs)
-if args.verbose:
+if not args.simple:
     print('CURRENT SETTINGS\n* MINIMUM_PERCENT_VOL:{}\n* TRADING_PAIRS:{}\n* COINS_SHOWN:{}\n* EXCHANGES:{}\n* ALL_TRADING_PAIRS:{}\n* ALL_EXCHANGES:{}\n'.format(args.minimum_vol,args.trading_pairs,args.coins_shown,lowercase_exchanges,all_trading_pairs,all_exchanges))
 for coin in cmc.ticker():
     try:
@@ -48,7 +48,7 @@ for coin in cmc.ticker():
     if is_up:
         info.append([coin['name'],round((best_price/worst_price-1)*100,2),worst_price,worst_exchange,worst_pair,best_price,best_exchange,best_pair])
     else:
-        if args.verbose:
+        if not args.simple:
             print(coin['name'],'had no markets that fit the criteria.')
     print('[{}/100]'.format(count),end='\r')
     count += 1
