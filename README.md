@@ -1,5 +1,5 @@
-# arbitrage-moments
-Finding the best arbitrage opportunities for the top 100 cryptocurrencies in python3.
+# arbitrage-chances
+Finding the best arbitrage opportunities for the top 100 cryptocurrencies.
 
 
 `start [--pairs -p] [--exchanges -e] [--minimum_volume -m] [--simple -s] [--coins_shown -c]`
