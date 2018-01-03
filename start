@@ -5,11 +5,11 @@ from operator import itemgetter
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-m','--minimum_vol',type=int,help='Minimum Percent volume per exchange to have to count',default=1)
-parser.add_argument('-p','--trading_pairs',nargs='*',default=[],help='Pairs the coins can be arbitraged with - default=all')
+parser.add_argument('-m','--minimum_vol',type=float,help='Minimum Percent volume per exchange to have to count',default=1)
+parser.add_argument('-t','--pairs',nargs='*',default=[],help='Pairs the coins can be arbitraged with - default=all')
 parser.add_argument('-c','--coins_shown',type=int,default=10,help='Number of coins to show')
 parser.add_argument('-e','--exchanges',nargs='*',help='Acceptable Exchanges - default=all',default=[])
-parser.add_argument('-at','--all_trading_pairs',help='Allow all trading pairs',default=False)
+parser.add_argument('-a','--all_trading_pairs',help='Allow all trading pairs',default=False)
 parser.add_argument('-s','--simple',help='Toggle off errors and settings',default=False,action="store_true")
 args = parser.parse_args()
 cmc = pymarketcap.Pymarketcap()
@@ -17,9 +17,9 @@ info = []
 count = 1
 lowercase_exchanges = [x.lower() for x in args.exchanges]
 all_exchanges = not bool(args.exchanges)
-all_trading_pairs = not bool(args.trading_pairs)
+all_trading_pairs = not bool(args.pairs)
 if not args.simple:
-    print('CURRENT SETTINGS\n* MINIMUM_PERCENT_VOL:{}\n* TRADING_PAIRS:{}\n* COINS_SHOWN:{}\n* EXCHANGES:{}\n* ALL_TRADING_PAIRS:{}\n* ALL_EXCHANGES:{}\n'.format(args.minimum_vol,args.trading_pairs,args.coins_shown,lowercase_exchanges,all_trading_pairs,all_exchanges))
+    print('CURRENT SETTINGS\n* MINIMUM_PERCENT_VOL:{}\n* TRADING_PAIRS:{}\n* COINS_SHOWN:{}\n* EXCHANGES:{}\n* ALL_TRADING_PAIRS:{}\n* ALL_EXCHANGES:{}\n'.format(args.minimum_vol,args.pairs,args.coins_shown,lowercase_exchanges,all_trading_pairs,all_exchanges))
 for coin in cmc.ticker():
     try:
         markets = cmc.markets(coin["id"])
@@ -35,7 +35,7 @@ for coin in cmc.ticker():
     is_up = False
     for market in markets:
         trades_into = market["pair"].replace(coin["symbol"],"").replace("-","")
-        if market['percent_volume'] >= args.minimum_vol and market['updated'] and (trades_into in args.trading_pairs or all_trading_pairs) and (market['exchange'].lower() in lowercase_exchanges or all_exchanges):
+        if market['percent_volume'] >= args.minimum_vol and market['updated'] and (trades_into in args.pairs or all_trading_pairs) and (market['exchange'].lower() in lowercase_exchanges or all_exchanges):
             is_up = True
             if market['price_usd'] >= best_price:
                 best_price = market['price_usd']
