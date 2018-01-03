@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
+try:
+    import pymarketcap
+    import decimal
+    from operator import itemgetter
+    import argparse
+except Exception as e:
+    print('Make sure to install {0} (pip3 install {0}).'.format(str(e).split("'")[1]))
+    exit()
 
-import pymarketcap, decimal
-from operator import itemgetter
-import argparse
-
+# arguments and setup
 parser = argparse.ArgumentParser()
 parser.add_argument('-m','--minimum_vol',type=float,help='Minimum Percent volume per exchange to have to count',default=1)
 parser.add_argument('-p','--pairs',nargs='*',default=[],help='Pairs the coins can be arbitraged with - default=all')
@@ -17,25 +22,28 @@ count = 1
 lowercase_exchanges = [x.lower() for x in args.exchanges]
 all_exchanges = not bool(args.exchanges)
 all_trading_pairs = not bool(args.pairs)
+coin_format = '{: <25} {: >6}% {: >10} {: >15} {: <10} {: <10} {: <15} {: <5}'
+
 if not args.simple:
     print('CURRENT SETTINGS\n* MINIMUM_PERCENT_VOL:{}\n* TRADING_PAIRS:{}\n* COINS_SHOWN:{}\n* EXCHANGES:{}\n* ALL_TRADING_PAIRS:{}\n* ALL_EXCHANGES:{}\n'.format(args.minimum_vol,args.pairs,args.coins_shown,lowercase_exchanges,all_trading_pairs,all_exchanges))
+
+# retrieve coin data
 for coin in cmc.ticker():
     try:
         markets = cmc.markets(coin["id"])
     except Exception as e:
         markets = cmc.markets(coin["symbol"])
-
     best_price = 0
     best_exchange = ''
     best_pair = ''
     worst_price = 999999
     worst_exchange = ''
     worst_pair = ''
-    is_up = False
+    has_markets = False
     for market in markets:
         trades_into = market["pair"].replace(coin["symbol"],"").replace("-","")
         if market['percent_volume'] >= args.minimum_vol and market['updated'] and (trades_into in args.pairs or all_trading_pairs) and (market['exchange'].lower() in lowercase_exchanges or all_exchanges):
-            is_up = True
+            has_markets = True
             if market['price_usd'] >= best_price:
                 best_price = market['price_usd']
                 best_exchange = market['exchange']
@@ -44,14 +52,16 @@ for coin in cmc.ticker():
                 worst_price = market['price_usd']
                 worst_exchange = market['exchange']
                 worst_pair = trades_into
-    if is_up:
+    if has_markets:
         info.append([coin['name'],round((best_price/worst_price-1)*100,2),worst_price,worst_exchange,worst_pair,best_price,best_exchange,best_pair])
-    else:
-        if not args.simple:
-            print(coin['name'],'had no markets that fit the criteria.')
+    elif not args.simple:
+        print(coin['name'],'had no markets that fit the criteria.')
+
     print('[{}/100]'.format(count),end='\r')
     count += 1
+
+# show data
 info = sorted(info,key=itemgetter(1))[::-1]
-print('{: <25} {: >6}% {: >10} {: >15} {: <10} {: <10} {: <15} {: <5}'.format("COIN","CHANGE","BUY PRICE","BUY AT","BUY WITH","SELL PRICE","SELL AT","SELL WITH"))
+print(coin_format.format("COIN","CHANGE","BUY PRICE","BUY AT","BUY WITH","SELL PRICE","SELL AT","SELL WITH"))
 for coin in info[0:args.coins_shown]:
-    print('{: <25} {: >6}% {: >10} {: >15} {: <10} {: <10} {: <15} {: <5}'.format(*coin))
+    print(coin_format.format(*coin))
