@@ -6,10 +6,9 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-m','--minimum_vol',type=float,help='Minimum Percent volume per exchange to have to count',default=1)
-parser.add_argument('-t','--pairs',nargs='*',default=[],help='Pairs the coins can be arbitraged with - default=all')
+parser.add_argument('-p','--pairs',nargs='*',default=[],help='Pairs the coins can be arbitraged with - default=all')
 parser.add_argument('-c','--coins_shown',type=int,default=10,help='Number of coins to show')
 parser.add_argument('-e','--exchanges',nargs='*',help='Acceptable Exchanges - default=all',default=[])
-parser.add_argument('-a','--all_trading_pairs',help='Allow all trading pairs',default=False)
 parser.add_argument('-s','--simple',help='Toggle off errors and settings',default=False,action="store_true")
 args = parser.parse_args()
 cmc = pymarketcap.Pymarketcap()
