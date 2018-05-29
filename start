@@ -28,11 +28,9 @@ coin_format = '{: <25} {: >6}% {: >10} {: >15} {: <10} {: <10} {: <15} {: <5}'
 if not args.simple:
     print('CURRENT SETTINGS\n* MINIMUM_PERCENT_VOL:{}\n* TRADING_PAIRS:{}\n* COINS_SHOWN:{}\n* EXCHANGES:{}\n* ALL_TRADING_PAIRS:{}\n* ALL_EXCHANGES:{}\n* TOP:{}\n'.format(args.minimum_vol,args.pairs,args.coins_shown,lowercase_exchanges,all_trading_pairs,all_exchanges,args.top))
 # retrieve coin data
-for coin in cmc.ticker(limit=args.top):
-    try:
-        markets = cmc.markets(coin["id"])
-    except Exception as e:
-        markets = cmc.markets(coin["symbol"])
+ticker = cmc.listings(limit=args.top)
+for coinID in ticker:
+    markets = cmc.markets(coinID["id"])
     best_price = 0
 
     best_exchange = ''
