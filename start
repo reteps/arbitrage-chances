@@ -8,6 +8,7 @@ import pymarketcap
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('-m', '--minimum_vol', type=float, help='Minimum Percent volume per exchange to have to count', default=1)
 parser.add_argument('-p', '--pairs', nargs='*', default=[], help='Pairs the coins can be arbitraged with - default=all')
+parser.add_argument('-l', '--coin_list', nargs='*', default=[], help='Replaces the number of top coins with a custom list of currencies')
 parser.add_argument('-c', '--coins_shown', type=int, default=10, help='Number of coins to show')
 parser.add_argument('-e', '--exchanges', nargs='*', help='Acceptable Exchanges - default=all', default=[])
 parser.add_argument('-s', '--simple', help='Toggle off errors and settings', default=False, action="store_true")
@@ -21,6 +22,10 @@ lowercase_exchanges = [x.lower() for x in args.exchanges]
 coin_format = '{: <25} {: >6}% {: >10} {: <15} {: <10} {: >7}% {: <10} {: <15} {: <10} {: >8}%'
 
 if not args.simple:
+    using_coin_list = bool(args.coin_list)
+    mode = 'TOP'
+    if bool(args.coin_list):
+        mode = 'COIN_LIST'
     print('CURRENT SETTINGS\n',
           '‣ MINIMUM_PERCENT_VOL: {}'.format(args.minimum_vol),
           '‣ TRADING_PAIRS: {}'.format(args.pairs),
@@ -28,11 +33,14 @@ if not args.simple:
           '‣ EXCHANGES: {}'.format(lowercase_exchanges),
           '‣ ALL_PAIRS: {}'.format(not args.pairs),
           '‣ ALL_EXCHANGES: {}'.format(not args.exchanges),
-          '‣ TOP: {}'.format(args.top),
+          '‣ {}: {}'.format(mode, args.coin_list or args.top),
           sep='\n')
 
 
-coin_data = cmc.ticker(limit=args.top)['data']
+if bool(args.coin_list):
+    coin_data = {coin: cmc.ticker(coin)['data'] for coin in args.coin_list}
+else:
+    coin_data = cmc.ticker(limit=args.top)['data']
 
 for id_, coin in coin_data.items():
     try:
