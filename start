@@ -22,9 +22,8 @@ lowercase_exchanges = [x.lower() for x in args.exchanges]
 coin_format = '{: <25} {: >6}% {: >10} {: <15} {: <10} {: >7}% {: <10} {: <15} {: <10} {: >8}%'
 
 if not args.simple:
-    using_coin_list = bool(args.coin_list)
     mode = 'TOP'
-    if bool(args.coin_list):
+    if args.coin_list:
         mode = 'COIN_LIST'
     print('CURRENT SETTINGS\n',
           '‣ MINIMUM_PERCENT_VOL: {}'.format(args.minimum_vol),
@@ -37,11 +36,19 @@ if not args.simple:
           sep='\n')
 
 
-if bool(args.coin_list):
+if args.coin_list:
     coin_data = {coin: cmc.ticker(coin)['data'] for coin in args.coin_list}
+elif args.top > 100:
+    count = args.top
+    size = 100
+    coin_data = {}
+    while count > 0:
+        if count - size < 0:
+            size = count
+        coin_data.update(cmc.ticker(limit=size, start=args.top-count)['data'])
+        count -= size
 else:
     coin_data = cmc.ticker(limit=args.top)['data']
-
 for id_, coin in coin_data.items():
     try:
         markets = cmc.markets(coin["id"])

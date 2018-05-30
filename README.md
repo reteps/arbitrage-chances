@@ -5,9 +5,10 @@ Finding the best arbitrage opportunities for the top 100 cryptocurrencies.
  + Cython - `python3 -m pip install cython`
  + Pymarketcap - `python3 -m pip install pymarketcap`
  
+
+### Settings
 `start [--pairs -p] [--exchanges -e] [--minimum_volume -m] [--simple -s] [--coins_shown -c] [--top -t] [--coin_list -l]`
 
-### Defaults
 + `trading_pairs = ALL`
   + sets what trading pairs are accepted
 + `exchanges = ALL`
