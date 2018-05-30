@@ -22,7 +22,7 @@ Finding the best arbitrage opportunities for the top 100 cryptocurrencies.
 + `coin_list = []`
   + If set, runs on a set of specified currencies instead of the top X currencies
 + `top = 100`
-  + sets the number of top currencies to use. It gets buggy towards the bottom (500s), so be warned.
+  + sets the number of top currencies to use. It gets buggy towards the bottom (700s), so be warned.
 
 I usually run it with these settings:   
 
